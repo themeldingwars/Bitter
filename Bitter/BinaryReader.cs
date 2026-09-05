@@ -4,7 +4,6 @@ using static Bitter.BinaryStream;
 using static Bitter.BinaryUtil;
 using static Bitter.BinaryWrapper;
 
-// TODO: Make array/list readers read entire array as a blob instead of each element. (speed)
 namespace Bitter
 {
     public class BinaryReader
@@ -147,10 +146,21 @@ namespace Bitter
         /// </summary>
         public short[] ShortArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 2);
             short[] ret = new short[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = (short)UShort();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = (short)UShortFromBufferLE(ref buffer, i * 2);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = (short)UShortFromBufferBE(ref buffer, i * 2);
+                }
             }
             return ret;
         }
@@ -160,10 +170,21 @@ namespace Bitter
         /// </summary>
         public List<short> ShortList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 2);
             List<short> ret = new List<short>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add((short)UShort());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add((short)UShortFromBufferLE(ref buffer, i * 2));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add((short)UShortFromBufferBE(ref buffer, i * 2));
+                }
             }
             return ret;
         }
@@ -221,10 +242,21 @@ namespace Bitter
         /// </summary>
         public int[] IntArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 4);
             int[] ret = new int[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = (int)UInt();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = (int)UIntFromBufferLE(ref buffer, i * 4);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = (int)UIntFromBufferBE(ref buffer, i * 4);
+                }
             }
             return ret;
         }
@@ -234,10 +266,21 @@ namespace Bitter
         /// </summary>
         public List<int> IntList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 4);
             List<int> ret = new List<int>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add((int)UInt());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add((int)UIntFromBufferLE(ref buffer, i * 4));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add((int)UIntFromBufferBE(ref buffer, i * 4));
+                }
             }
             return ret;
         }
@@ -295,10 +338,21 @@ namespace Bitter
         /// </summary>
         public long[] LongArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 8);
             long[] ret = new long[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = (long)ULong();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = (long)ULongFromBufferLE(ref buffer, i * 8);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = (long)ULongFromBufferBE(ref buffer, i * 8);
+                }
             }
             return ret;
         }
@@ -308,10 +362,21 @@ namespace Bitter
         /// </summary>
         public List<long> LongList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 8);
             List<long> ret = new List<long>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add((long)ULong());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add((long)ULongFromBufferLE(ref buffer, i * 8));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add((long)ULongFromBufferBE(ref buffer, i * 8));
+                }
             }
             return ret;
         }
@@ -457,10 +522,21 @@ namespace Bitter
         /// </summary>
         public ushort[] UShortArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 2);
             ushort[] ret = new ushort[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = UShort();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = UShortFromBufferLE(ref buffer, i * 2);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = UShortFromBufferBE(ref buffer, i * 2);
+                }
             }
             return ret;
         }
@@ -470,10 +546,21 @@ namespace Bitter
         /// </summary>
         public List<ushort> UShortList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 2);
             List<ushort> ret = new List<ushort>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add(UShort());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(UShortFromBufferLE(ref buffer, i * 2));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(UShortFromBufferBE(ref buffer, i * 2));
+                }
             }
             return ret;
         }
@@ -543,10 +630,21 @@ namespace Bitter
         /// </summary>
         public uint[] UIntArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 4);
             uint[] ret = new uint[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = UInt();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = UIntFromBufferLE(ref buffer, i * 4);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = UIntFromBufferBE(ref buffer, i * 4);
+                }
             }
             return ret;
         }
@@ -556,10 +654,21 @@ namespace Bitter
         /// </summary>
         public List<uint> UIntList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 4);
             List<uint> ret = new List<uint>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add(UInt());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(UIntFromBufferLE(ref buffer, i * 4));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(UIntFromBufferBE(ref buffer, i * 4));
+                }
             }
             return ret;
         }
@@ -638,10 +747,21 @@ namespace Bitter
         /// </summary>
         public ulong[] ULongArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 8);
             ulong[] ret = new ulong[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = ULong();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = ULongFromBufferLE(ref buffer, i * 8);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = ULongFromBufferBE(ref buffer, i * 8);
+                }
             }
             return ret;
         }
@@ -651,10 +771,21 @@ namespace Bitter
         /// </summary>
         public List<ulong> ULongList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 8);
             List<ulong> ret = new List<ulong>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add(ULong());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(ULongFromBufferLE(ref buffer, i * 8));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(ULongFromBufferBE(ref buffer, i * 8));
+                }
             }
             return ret;
         }
@@ -709,9 +840,7 @@ namespace Bitter
         /// </summary>
         public float Half()
         {
-            ushort u = UShort(); // already read in correct endianess
-            _floatUIntMapBuffer.UInt = HalfLookup.Mantissa[HalfLookup.Offset[u >> 10] + (u & 0x3ff)] + HalfLookup.Exponent[u >> 10];
-            return _floatUIntMapBuffer.Float;
+            return HalfFromUShort(UShort()); // already read in correct endianess
         }
 
         /// <summary>
@@ -719,10 +848,21 @@ namespace Bitter
         /// </summary>
         public float[] HalfArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 2);
             float[] ret = new float[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = Half();
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = HalfFromUShort(UShortFromBufferLE(ref buffer, i * 2));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret[i] = HalfFromUShort(UShortFromBufferBE(ref buffer, i * 2));
+                }
             }
             return ret;
         }
@@ -732,12 +872,29 @@ namespace Bitter
         /// </summary>
         public List<float> HalfList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 2);
             List<float> ret = new List<float>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add(Half());
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(HalfFromUShort(UShortFromBufferLE(ref buffer, i * 2)));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    ret.Add(HalfFromUShort(UShortFromBufferBE(ref buffer, i * 2)));
+                }
             }
             return ret;
+        }
+
+        private float HalfFromUShort(ushort u)
+        {
+            _floatUIntMapBuffer.UInt = HalfLookup.Mantissa[HalfLookup.Offset[u >> 10] + (u & 0x3ff)] + HalfLookup.Exponent[u >> 10];
+            return _floatUIntMapBuffer.Float;
         }
 
         // -- Float
@@ -756,10 +913,23 @@ namespace Bitter
         /// </summary>
         public float[] FloatArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 4);
             float[] ret = new float[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = Float();
+                for (int i = 0; i < count; i++)
+                {
+                    _floatUIntMapBuffer.UInt = UIntFromBufferLE(ref buffer, i * 4);
+                    ret[i] = _floatUIntMapBuffer.Float;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    _floatUIntMapBuffer.UInt = UIntFromBufferBE(ref buffer, i * 4);
+                    ret[i] = _floatUIntMapBuffer.Float;
+                }
             }
             return ret;
         }
@@ -769,10 +939,23 @@ namespace Bitter
         /// </summary>
         public List<float> FloatList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 4);
             List<float> ret = new List<float>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add(Float());
+                for (int i = 0; i < count; i++)
+                {
+                    _floatUIntMapBuffer.UInt = UIntFromBufferLE(ref buffer, i * 4);
+                    ret.Add(_floatUIntMapBuffer.Float);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    _floatUIntMapBuffer.UInt = UIntFromBufferBE(ref buffer, i * 4);
+                    ret.Add(_floatUIntMapBuffer.Float);
+                }
             }
             return ret;
         }
@@ -793,10 +976,23 @@ namespace Bitter
         /// </summary>
         public double[] DoubleArray(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 8);
             double[] ret = new double[count];
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret[i] = Double();
+                for (int i = 0; i < count; i++)
+                {
+                    _doubleULongMapBuffer.ULong = ULongFromBufferLE(ref buffer, i * 8);
+                    ret[i] = _doubleULongMapBuffer.Double;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    _doubleULongMapBuffer.ULong = ULongFromBufferBE(ref buffer, i * 8);
+                    ret[i] = _doubleULongMapBuffer.Double;
+                }
             }
             return ret;
         }
@@ -806,10 +1002,23 @@ namespace Bitter
         /// </summary>
         public List<double> DoubleList(int count)
         {
+            byte[] buffer = stream.baseStream.ReadByte(count * 8);
             List<double> ret = new List<double>(count);
-            for (int i = 0; i < count; i++)
+            if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                ret.Add(Double());
+                for (int i = 0; i < count; i++)
+                {
+                    _doubleULongMapBuffer.ULong = ULongFromBufferLE(ref buffer, i * 8);
+                    ret.Add(_doubleULongMapBuffer.Double);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    _doubleULongMapBuffer.ULong = ULongFromBufferBE(ref buffer, i * 8);
+                    ret.Add(_doubleULongMapBuffer.Double);
+                }
             }
             return ret;
         }
