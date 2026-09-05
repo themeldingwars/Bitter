@@ -1,0 +1,77 @@
+name: Build, Test & Publish
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
+    runs-on: ${{ matrix.platform.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+        - { name: Windows, os: windows-2025-vs2026 }
+        dotnet:
+        - { name: .NET Framework 4.8, version: '8.0.x', target: 'net48' }
+        - { name: .NET 8, version: '8.0.x', target: 'net8.0' }
+        - { name: .NET 9, version: '9.0.x', target: 'net8.0' }
+        - { name: .NET 10, version: '10.0.x', target: 'net8.0' }
+
+    steps:
+      - name: Checkout Bitter
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Required for Nerdbank.GitVersioning
+          persist-credentials: false
+
+      - name: Setup ${{ matrix.dotnet.name }} SDK
+        id: setup-dotnet
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ matrix.dotnet.version }}
+      - name: Enforce SDK Version
+        env:
+          DOTNET_VERSION: ${{ steps.setup-dotnet.outputs.dotnet-version }}
+        run: dotnet new globaljson --sdk-version $env:DOTNET_VERSION --force
+      - name: Verify SDK Installation
+        run: dotnet --info
+
+      - name: Restore
+        run: dotnet restore Bitter.sln
+      - name: Build
+        run: dotnet build Bitter.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test Bitter.Tests/Bitter.Tests.csproj --configuration Release --no-restore --framework ${{ matrix.dotnet.target }}
+      - name: Pack
+        run: dotnet pack Bitter/Bitter.csproj --configuration Release --output ./artifacts
+
+      - name: Upload NuGet Package Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: "Bitter (${{ matrix.platform.name }} ${{ matrix.dotnet.name }})"
+          path: ./artifacts/*.*nupkg
+
+      - name: NuGet Login
+        if: github.ref == 'refs/heads/master' && matrix.dotnet.name == '.NET 8' && runner.os == 'Windows'
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: TMW
+      - name: Publish NuGet Packages
+        if: github.ref == 'refs/heads/master' && matrix.dotnet.name == '.NET 8' && runner.os == 'Windows'
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          foreach ($file in (Get-ChildItem ./artifacts/ -Recurse -Include *.nupkg)) {
+            dotnet nuget push $file --api-key "$env:NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
