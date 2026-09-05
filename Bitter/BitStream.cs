@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace Bitter
@@ -206,6 +206,14 @@ namespace Bitter
         /// </summary>
         public void WriteBit(byte[] value)
         {
+            WriteBit(new ReadOnlySpan<byte>(value));
+        }
+
+        /// <summary>
+        /// Writes n bits to the stream.
+        /// </summary>
+        public void WriteBit(ReadOnlySpan<byte> value)
+        {
             for (int i = 0; i < value.Length; i++)
             {
                 if (value[i] == 1)
@@ -256,35 +264,47 @@ namespace Bitter
         /// </summary>
         public byte[] ReadByte(int length)
         {
+            byte[] ret = new byte[length];
+            ReadByte(new Span<byte>(ret));
+            return ret;
+        }
+
+        /// <summary>
+        /// Reads n bytes from the stream into a caller-supplied buffer, without allocating.
+        /// </summary>
+        public void ReadByte(Span<byte> buffer)
+        {
+            int length = buffer.Length;
             if (bitOffset == 0)
             {
-                byte[] ret = new byte[length];
-
                 if (stream.Position == byteOffset + 1)
                 {
-                    ret[0] = bitBuffer;
-                    stream.Read(ret, 1, length - 1);
+                    buffer[0] = bitBuffer;
+                    if (length > 1)
+                    {
+                        StreamCompat.ReadSpan(stream, buffer.Slice(1, length - 1));
+                    }
                 }
                 else
                 {
                     stream.Position = byteOffset;
-                    stream.Read(ret, 0, length);
+                    StreamCompat.ReadSpan(stream, buffer);
                 }
 
                 byteOffset += length;
                 bitBuffer = (byte)stream.ReadByte();
                 if (msb)
                 {
-                    for (int i = 0; i < ret.Length; i++)
+                    for (int i = 0; i < length; i++)
                     {
-                        ret[i] = BitReverseTable[ret[i]];
+                        buffer[i] = BitReverseTable[buffer[i]];
                     }
                 }
-                return ret;
             }
             else
             {
-                return _ReadBitsAsBytes(length, true);
+                byte[] bits = _ReadBitsAsBytes(length, true);
+                bits.AsSpan().CopyTo(buffer);
             }
         }
 
@@ -318,7 +338,7 @@ namespace Bitter
             }
             else
             {
-                _WriteBytesAsBits(new byte[] { value }, 1, true);
+                _WriteBytesAsBits(stackalloc byte[] { value }, 1, true);
             }
         }
 
@@ -326,6 +346,16 @@ namespace Bitter
         /// Writes n bytes from the stream.
         /// </summary>
         public void WriteByte(byte[] data)
+        {
+            WriteByte(new Span<byte>(data));
+        }
+
+        /// <summary>
+        /// Writes n bytes to the stream from a caller-supplied buffer, without allocating.
+        /// Note: when the stream's bit order is most-significant-bit-first, the buffer's contents
+        /// are reversed in place (matching the previous byte[]-based behavior).
+        /// </summary>
+        public void WriteByte(Span<byte> data)
         {
             if (bitOffset == 0)
             {
@@ -337,7 +367,7 @@ namespace Bitter
                         data[i] = BitReverseTable[data[i]];
                     }
                 }
-                stream.Write(data, 0, data.Length);
+                StreamCompat.WriteSpan(stream, data);
                 byteOffset += data.Length;
                 bitBuffer = (byte)stream.ReadByte();
             }
@@ -352,13 +382,21 @@ namespace Bitter
         /// </summary>
         public void WriteByteAsBits(byte data, int length)
         {
-            _WriteBytesAsBits(new byte[] { data }, length);
+            _WriteBytesAsBits(stackalloc byte[] { data }, length);
         }
 
         /// <summary>
         /// Writes n bits to stream from supplied byte array.
         /// </summary>
         public void WriteBytesAsBits(byte[] data, int length)
+        {
+            _WriteBytesAsBits(data, length);
+        }
+
+        /// <summary>
+        /// Writes n bits to stream from supplied buffer.
+        /// </summary>
+        public void WriteBytesAsBits(ReadOnlySpan<byte> data, int length)
         {
             _WriteBytesAsBits(data, length);
         }
@@ -426,7 +464,7 @@ namespace Bitter
             }
             return res;
         }
-        private void _WriteBytesAsBits(byte[] data, int length, bool lengthInBytes = false)
+        private void _WriteBytesAsBits(ReadOnlySpan<byte> data, int length, bool lengthInBytes = false)
         {
             if (lengthInBytes)
             {

@@ -48,7 +48,7 @@ namespace Bitter
         {
             BinaryStream bs = new BinaryStream(File.Open(file, FileMode.Open), byteOrder, bitOrder, defaultTextEncoding);
             Read(bs);
-            if(!keepReadOpen)
+            if (!keepReadOpen)
             {
                 bs.Dispose();
             }

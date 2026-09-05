@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using static Bitter.BinaryStream;
@@ -11,12 +11,7 @@ namespace Bitter
     {
         private BinaryStream stream;
 
-        private byte[] _twoByteBuffer = new byte[2];
-        private byte[] _fourByteBuffer = new byte[4];
-        private byte[] _eightByteBuffer = new byte[8];
-        private FloatByteMap _floatByteMapBuffer = new FloatByteMap();
         private FloatUIntMap _floatUIntMapBuffer = new FloatUIntMap();
-        private DoubleByteMap _doubleByteMapBuffer = new DoubleByteMap();
         private DoubleULongMap _doubleULongMapBuffer = new DoubleULongMap();
         private Encoding _textEncoder;
         private int _textCharacterWidth;
@@ -132,18 +127,22 @@ namespace Bitter
         public void ShortArray(short[] value)
         {
             byte[] buffer = new byte[value.Length * 2];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, (ushort)value[i], i * 2);
+                    WriteToBufferLE(buffer, (ushort)value[i], i * 2);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, (ushort)value[i], i * 2);
+                    WriteToBufferBE(buffer, (ushort)value[i], i * 2);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -159,14 +158,14 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, (ushort)value[i], i * 2);
+                    WriteToBufferLE(buffer, (ushort)value[i], i * 2);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, (ushort)value[i], i * 2);
+                    WriteToBufferBE(buffer, (ushort)value[i], i * 2);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -228,18 +227,22 @@ namespace Bitter
         public void IntArray(int[] value)
         {
             byte[] buffer = new byte[value.Length * 4];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, (uint)value[i], i * 4);
+                    WriteToBufferLE(buffer, (uint)value[i], i * 4);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, (uint)value[i], i * 4);
+                    WriteToBufferBE(buffer, (uint)value[i], i * 4);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -255,14 +258,14 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, (uint)value[i], i * 4);
+                    WriteToBufferLE(buffer, (uint)value[i], i * 4);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, (uint)value[i], i * 4);
+                    WriteToBufferBE(buffer, (uint)value[i], i * 4);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -325,18 +328,22 @@ namespace Bitter
         public void LongArray(long[] value)
         {
             byte[] buffer = new byte[value.Length * 8];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, (ulong)value[i], i * 8);
+                    WriteToBufferLE(buffer, (ulong)value[i], i * 8);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, (ulong)value[i], i * 8);
+                    WriteToBufferBE(buffer, (ulong)value[i], i * 8);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -352,14 +359,14 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, (ulong)value[i], i * 8);
+                    WriteToBufferLE(buffer, (ulong)value[i], i * 8);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, (ulong)value[i], i * 8);
+                    WriteToBufferBE(buffer, (ulong)value[i], i * 8);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -468,15 +475,16 @@ namespace Bitter
         /// </summary>
         public void UShort(ushort value)
         {
+            Span<byte> buffer = stackalloc byte[2];
             if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                WriteToBufferLE(ref _twoByteBuffer, value);
+                WriteToBufferLE(buffer, value);
             }
             else
             {
-                WriteToBufferBE(ref _twoByteBuffer, value);
+                WriteToBufferBE(buffer, value);
             }
-            stream.baseStream.WriteByte(_twoByteBuffer);
+            stream.baseStream.WriteByte(buffer);
         }
 
         /// <summary>
@@ -485,18 +493,22 @@ namespace Bitter
         public void UShortArray(ushort[] value)
         {
             byte[] buffer = new byte[value.Length * 2];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 2);
+                    WriteToBufferLE(buffer, value[i], i * 2);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, value[i], i * 2);
+                    WriteToBufferBE(buffer, value[i], i * 2);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -512,14 +524,14 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 2);
+                    WriteToBufferLE(buffer, value[i], i * 2);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, value[i], i * 2);
+                    WriteToBufferBE(buffer, value[i], i * 2);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -530,8 +542,9 @@ namespace Bitter
         /// </summary>
         public void UShortAsBits(ushort value, int numBits)
         {
-            WriteToBufferLE(ref _twoByteBuffer, value);
-            stream.baseStream.WriteBytesAsBits(_twoByteBuffer, numBits);
+            Span<byte> buffer = stackalloc byte[2];
+            WriteToBufferLE(buffer, value);
+            stream.baseStream.WriteBytesAsBits(buffer, numBits);
         }
 
         /// <summary>
@@ -563,15 +576,16 @@ namespace Bitter
         /// </summary>
         public void UInt(uint value)
         {
+            Span<byte> buffer = stackalloc byte[4];
             if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                WriteToBufferLE(ref _fourByteBuffer, value);
+                WriteToBufferLE(buffer, value);
             }
             else
             {
-                WriteToBufferBE(ref _fourByteBuffer, value);
+                WriteToBufferBE(buffer, value);
             }
-            stream.baseStream.WriteByte(_fourByteBuffer);
+            stream.baseStream.WriteByte(buffer);
         }
 
         /// <summary>
@@ -580,18 +594,22 @@ namespace Bitter
         public void UIntArray(uint[] value)
         {
             byte[] buffer = new byte[value.Length * 4];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 4);
+                    WriteToBufferLE(buffer, value[i], i * 4);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, value[i], i * 4);
+                    WriteToBufferBE(buffer, value[i], i * 4);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -607,14 +625,14 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 4);
+                    WriteToBufferLE(buffer, value[i], i * 4);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, value[i], i * 4);
+                    WriteToBufferBE(buffer, value[i], i * 4);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -625,8 +643,9 @@ namespace Bitter
         /// </summary>
         public void UIntAsBits(uint value, int numBits)
         {
-            WriteToBufferLE(ref _fourByteBuffer, value);
-            stream.baseStream.WriteBytesAsBits(_fourByteBuffer, numBits);
+            Span<byte> buffer = stackalloc byte[4];
+            WriteToBufferLE(buffer, value);
+            stream.baseStream.WriteBytesAsBits(buffer, numBits);
         }
 
         /// <summary>
@@ -658,15 +677,16 @@ namespace Bitter
         /// </summary>
         public void ULong(ulong value)
         {
+            Span<byte> buffer = stackalloc byte[8];
             if (stream.ByteOrder == Endianness.LittleEndian)
             {
-                WriteToBufferLE(ref _eightByteBuffer, value);
+                WriteToBufferLE(buffer, value);
             }
             else
             {
-                WriteToBufferBE(ref _eightByteBuffer, value);
+                WriteToBufferBE(buffer, value);
             }
-            stream.baseStream.WriteByte(_eightByteBuffer);
+            stream.baseStream.WriteByte(buffer);
         }
 
         /// <summary>
@@ -675,18 +695,22 @@ namespace Bitter
         public void ULongArray(ulong[] value)
         {
             byte[] buffer = new byte[value.Length * 8];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 8);
+                    WriteToBufferLE(buffer, value[i], i * 8);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 8);
+                    WriteToBufferBE(buffer, value[i], i * 8);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -702,14 +726,14 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 8);
+                    WriteToBufferLE(buffer, value[i], i * 8);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, value[i], i * 8);
+                    WriteToBufferBE(buffer, value[i], i * 8);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -721,8 +745,9 @@ namespace Bitter
         /// </summary>
         public void ULongAsBits(ulong value, int numBits)
         {
-            WriteToBufferLE(ref _eightByteBuffer, value);
-            stream.baseStream.WriteBytesAsBits(_eightByteBuffer, numBits);
+            Span<byte> buffer = stackalloc byte[8];
+            WriteToBufferLE(buffer, value);
+            stream.baseStream.WriteBytesAsBits(buffer, numBits);
         }
 
         /// <summary>
@@ -806,18 +831,24 @@ namespace Bitter
         public void FloatArray(float[] value)
         {
             byte[] buffer = new byte[value.Length * 4];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, ref _floatByteMapBuffer, value[i], i * 4);
+                    _floatUIntMapBuffer.Float = value[i];
+                    WriteToBufferLE(buffer, _floatUIntMapBuffer.UInt, i * 4);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, ref _floatByteMapBuffer, value[i], i * 4);
+                    _floatUIntMapBuffer.Float = value[i];
+                    WriteToBufferBE(buffer, _floatUIntMapBuffer.UInt, i * 4);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -833,14 +864,16 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, ref _floatByteMapBuffer, value[i], i * 4);
+                    _floatUIntMapBuffer.Float = value[i];
+                    WriteToBufferLE(buffer, _floatUIntMapBuffer.UInt, i * 4);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, ref _floatByteMapBuffer, value[i], i * 4);
+                    _floatUIntMapBuffer.Float = value[i];
+                    WriteToBufferBE(buffer, _floatUIntMapBuffer.UInt, i * 4);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -863,18 +896,24 @@ namespace Bitter
         public void DoubleArray(double[] value)
         {
             byte[] buffer = new byte[value.Length * 8];
-            if (stream.ByteOrder == Endianness.LittleEndian)
+            if ((stream.ByteOrder == Endianness.LittleEndian) == BitConverter.IsLittleEndian)
+            {
+                Buffer.BlockCopy(value, 0, buffer, 0, buffer.Length);
+            }
+            else if (stream.ByteOrder == Endianness.LittleEndian)
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferLE(ref buffer, ref _doubleByteMapBuffer, value[i], i * 8);
+                    _doubleULongMapBuffer.Double = value[i];
+                    WriteToBufferLE(buffer, _doubleULongMapBuffer.ULong, i * 8);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Length; i++)
                 {
-                    WriteToBufferBE(ref buffer, ref _doubleByteMapBuffer, value[i], i * 8);
+                    _doubleULongMapBuffer.Double = value[i];
+                    WriteToBufferBE(buffer, _doubleULongMapBuffer.ULong, i * 8);
                 }
             }
             stream.baseStream.WriteByte(buffer);
@@ -890,14 +929,16 @@ namespace Bitter
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferLE(ref buffer, ref _doubleByteMapBuffer, value[i], i * 8);
+                    _doubleULongMapBuffer.Double = value[i];
+                    WriteToBufferLE(buffer, _doubleULongMapBuffer.ULong, i * 8);
                 }
             }
             else
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    WriteToBufferBE(ref buffer, ref _doubleByteMapBuffer, value[i], i * 8);
+                    _doubleULongMapBuffer.Double = value[i];
+                    WriteToBufferBE(buffer, _doubleULongMapBuffer.ULong, i * 8);
                 }
             }
             stream.baseStream.WriteByte(buffer);

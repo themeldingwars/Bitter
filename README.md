@@ -1,6 +1,6 @@
-
 # Bitter
-*.NET Standard 2.0 Library for manipulating binary data*
+
+*.NET Standard 2.0 / .NET 8 Library for manipulating binary data*
 
 **The library supports reading and writing**
  - Induvidual bits
@@ -22,7 +22,8 @@
 
 You can read and write to the **same stream**, making it easy to descramble data without the need of multiple streams.
 
-### Quick usage guide, more will follow 
+### Quick usage guide, more will follow
+
 ```c#
 BinaryStream stream = new BinaryStream();       // if you dont provide it with a stream it'll use a MemoryStream internally.
 
