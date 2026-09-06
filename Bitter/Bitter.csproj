@@ -3,10 +3,31 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+
+    <!-- NuGet Package Information -->
+    <PackageId>TMW.Bitter</PackageId>
+    <Title>Bitter</Title>
+    <Authors>freakbyte</Authors>
+    <Company>freakbyte</Company>
+    <Product>Bitter</Product>
+    <Description>A .NET Standard 2.0 / .NET 8 library for manipulating binary data</Description>
+    <PackageTags>binary;byte;bits</PackageTags>
+    <PackageProjectUrl>https://github.com/freakbyte/Bitter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/themeldingwars/Bitter</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright (c) 2018 freakbyte</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Memory" Version="4.6.3" />
   </ItemGroup>
-
+    
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
