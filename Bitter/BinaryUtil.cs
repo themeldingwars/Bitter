@@ -32,6 +32,28 @@ namespace Bitter
             return BinaryPrimitives.ReadUInt64BigEndian(buffer.Slice(offset));
         }
 
+        // Conversion methods for easier migration from the old FloatByteMap/DoubleByteMap helpers.
+        public static float FloatFromBufferLE(ReadOnlySpan<byte> buffer, int offset = 0)
+        {
+            var map = new FloatUIntMap { UInt = UIntFromBufferLE(buffer, offset) };
+            return map.Float;
+        }
+        public static float FloatFromBufferBE(ReadOnlySpan<byte> buffer, int offset = 0)
+        {
+            var map = new FloatUIntMap { UInt = UIntFromBufferBE(buffer, offset) };
+            return map.Float;
+        }
+        public static double DoubleFromBufferLE(ReadOnlySpan<byte> buffer, int offset = 0)
+        {
+            var map = new DoubleULongMap { ULong = ULongFromBufferLE(buffer, offset) };
+            return map.Double;
+        }
+        public static double DoubleFromBufferBE(ReadOnlySpan<byte> buffer, int offset = 0)
+        {
+            var map = new DoubleULongMap { ULong = ULongFromBufferBE(buffer, offset) };
+            return map.Double;
+        }
+
         public static void WriteToBufferLE(Span<byte> buffer, ushort value, int offset = 0)
         {
             BinaryPrimitives.WriteUInt16LittleEndian(buffer.Slice(offset), value);
@@ -55,6 +77,24 @@ namespace Bitter
         public static void WriteToBufferBE(Span<byte> buffer, ulong value, int offset = 0)
         {
             BinaryPrimitives.WriteUInt64BigEndian(buffer.Slice(offset), value);
+        }
+
+        // Conversion methods for easier migration from the old FloatByteMap/DoubleByteMap helpers.
+        public static void WriteToBufferLE(Span<byte> buffer, float value, int offset = 0)
+        {
+            WriteToBufferLE(buffer, new FloatUIntMap { Float = value }.UInt, offset);
+        }
+        public static void WriteToBufferBE(Span<byte> buffer, float value, int offset = 0)
+        {
+            WriteToBufferBE(buffer, new FloatUIntMap { Float = value }.UInt, offset);
+        }
+        public static void WriteToBufferLE(Span<byte> buffer, double value, int offset = 0)
+        {
+            WriteToBufferLE(buffer, new DoubleULongMap { Double = value }.ULong, offset);
+        }
+        public static void WriteToBufferBE(Span<byte> buffer, double value, int offset = 0)
+        {
+            WriteToBufferBE(buffer, new DoubleULongMap { Double = value }.ULong, offset);
         }
 
         [StructLayout(LayoutKind.Explicit)]
