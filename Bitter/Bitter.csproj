@@ -8,15 +8,17 @@
     <PackageId>TMW.Bitter</PackageId>
     <Title>Bitter</Title>
     <Authors>freakbyte</Authors>
-    <Company>freakbyte</Company>
+    <Company>The Melding Wars</Company>
     <Product>Bitter</Product>
     <Description>A .NET Standard 2.0 / .NET 8 library for manipulating binary data</Description>
     <PackageTags>binary;byte;bits</PackageTags>
     <PackageProjectUrl>https://github.com/freakbyte/Bitter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/themeldingwars/Bitter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Copyright>Copyright (c) 2018 freakbyte</Copyright>
+    <Copyright>Copyright © 2018-2026 freakbyte and The Melding Wars contributors</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
