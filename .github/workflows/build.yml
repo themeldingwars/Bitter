@@ -6,6 +6,10 @@ permissions:
   contents: read
   id-token: write
 
+defaults:
+  run:
+    shell: bash
+
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_NOLOGO: true
@@ -42,7 +46,7 @@ jobs:
       - name: Enforce SDK Version
         env:
           DOTNET_VERSION: ${{ steps.setup-dotnet.outputs.dotnet-version }}
-        run: dotnet new globaljson --sdk-version $env:DOTNET_VERSION --force
+        run: dotnet new globaljson --sdk-version "$DOTNET_VERSION" --force
       - name: Verify SDK Installation
         run: dotnet --info
 
@@ -72,6 +76,6 @@ jobs:
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
-          foreach ($file in (Get-ChildItem ./artifacts/ -Recurse -Include *.nupkg)) {
-            dotnet nuget push $file --api-key "$env:NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
-          }
+          for f in $(find ./artifacts -name '*.nupkg'); do
+            dotnet nuget push "$f" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
