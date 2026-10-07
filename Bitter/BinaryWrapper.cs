@@ -46,8 +46,16 @@ namespace Bitter
         /// </summary>
         public void Read(string file)
         {
-            BinaryStream bs = new BinaryStream(File.Open(file, FileMode.Open), byteOrder, bitOrder, defaultTextEncoding);
-            Read(bs);
+            BinaryStream bs = new BinaryStream(File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read), byteOrder, bitOrder, defaultTextEncoding);
+            try
+            {
+                Read(bs);
+            }
+            catch
+            {
+                bs.Dispose();
+                throw;
+            }
             if (!keepReadOpen)
             {
                 bs.Dispose();
@@ -93,8 +101,16 @@ namespace Bitter
         /// </summary>
         public void Write(string file)
         {
-            BinaryStream bs = new BinaryStream(File.Open(file, FileMode.OpenOrCreate), byteOrder, bitOrder, defaultTextEncoding);
-            Write(bs);
+            BinaryStream bs = new BinaryStream(File.Open(file, FileMode.Create), byteOrder, bitOrder, defaultTextEncoding);
+            try
+            {
+                Write(bs);
+            }
+            catch
+            {
+                bs.Dispose();
+                throw;
+            }
             if (!keepWriteOpen)
             {
                 bs.Dispose();

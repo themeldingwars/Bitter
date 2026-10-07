@@ -1,3 +1,4 @@
+using System.IO;
 using static Bitter.BinaryWrapper;
 
 namespace Bitter.Tests
@@ -43,6 +44,21 @@ namespace Bitter.Tests
         {
             keepReadOpen = true;
             keepWriteOpen = true;
+        }
+    }
+
+    public class ThrowingModel : BinaryWrapper, ReadWrite
+    {
+        public override void Read(BinaryStream bs)
+        {
+            bs.Read.Int();
+            throw new InvalidDataException("Read failed");
+        }
+
+        public override void Write(BinaryStream bs)
+        {
+            bs.Write.Int(1);
+            throw new InvalidDataException("Write failed");
         }
     }
 

@@ -75,6 +75,125 @@ namespace Bitter.Tests
         }
 
         [TestMethod]
+        public void Read_File_ThatThrows_ClosesTheFile()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            try
+            {
+                File.WriteAllBytes(path, new byte[12]);
+                ThrowingModel model = new ThrowingModel();
+                Action read = () => model.Read(path);
+                read.ShouldThrow<InvalidDataException>();
+
+                Action delete = () => File.Delete(path);
+
+                delete.ShouldNotThrow();
+            }
+            finally
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Read_File_OpenElsewhereForReading_Reads()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            try
+            {
+                Vector3Model original = new Vector3Model { X = 1f, Y = 2f, Z = 3f };
+                original.Write(path);
+                using FileStream other = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                Vector3Model result = new Vector3Model();
+                result.Read(path);
+
+                result.ShouldBe(original);
+            }
+            finally
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Read_ReadOnlyFile_Reads()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            try
+            {
+                Vector3Model original = new Vector3Model { X = 1f, Y = 2f, Z = 3f };
+                original.Write(path);
+                File.SetAttributes(path, FileAttributes.ReadOnly);
+
+                Vector3Model result = new Vector3Model();
+                result.Read(path);
+
+                result.ShouldBe(original);
+            }
+            finally
+            {
+                if (File.Exists(path))
+                {
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Write_File_ThatThrows_ClosesTheFile()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            try
+            {
+                ThrowingModel model = new ThrowingModel();
+                Action write = () => model.Write(path);
+                write.ShouldThrow<InvalidDataException>();
+
+                Action delete = () => File.Delete(path);
+
+                delete.ShouldNotThrow();
+            }
+            finally
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Write_File_OverLongerFile_ReplacesIt()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            try
+            {
+                File.WriteAllBytes(path, new byte[100]);
+                Vector3Model model = new Vector3Model { X = 1f, Y = 2f, Z = 3f };
+
+                model.Write(path);
+                long length = new FileInfo(path).Length;
+
+                length.ShouldBe(12);
+            }
+            finally
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        [TestMethod]
         public void ByteOrder_Affects_Serialization()
         {
             Vector3Model model = new Vector3Model { X = 1f, Y = 2f, Z = 3f };
