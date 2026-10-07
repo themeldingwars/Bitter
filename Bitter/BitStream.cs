@@ -275,6 +275,11 @@ namespace Bitter
         public void ReadByte(Span<byte> buffer)
         {
             int length = buffer.Length;
+            if (length == 0)
+            {
+                return;
+            }
+
             if (bitOffset == 0)
             {
                 if (stream.Position == byteOffset + 1)

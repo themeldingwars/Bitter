@@ -66,6 +66,60 @@ namespace Bitter.Tests
         }
 
         [TestMethod]
+        public void ReadByte_ZeroLength_AfterRead_ReadsNothing()
+        {
+            using MemoryStream ms = new MemoryStream(new byte[] { 10, 20, 30 });
+            BitStream stream = new BitStream(ms);
+            stream.ReadByte();
+
+            byte[] empty = stream.ReadByte(0);
+            byte next = stream.ReadByte();
+
+            empty.ShouldBeEmpty();
+            next.ShouldBe((byte)20);
+        }
+
+        [TestMethod]
+        public void ReadByte_ZeroLength_AtStart_ReadsNothing()
+        {
+            using MemoryStream ms = new MemoryStream(new byte[] { 10, 20, 30 });
+            BitStream stream = new BitStream(ms);
+
+            byte[] empty = stream.ReadByte(0);
+            byte next = stream.ReadByte();
+
+            empty.ShouldBeEmpty();
+            next.ShouldBe((byte)10);
+        }
+
+        [TestMethod]
+        public void ReadByte_ZeroLength_Unaligned_ReadsNothing()
+        {
+            using MemoryStream ms = new MemoryStream(new byte[] { 0b0000_0001, 0b0000_0001 });
+            BitStream stream = new BitStream(ms);
+            stream.ReadBit();
+
+            byte[] empty = stream.ReadByte(0);
+            byte next = stream.ReadByteFromBits(8);
+
+            empty.ShouldBeEmpty();
+            next.ShouldBe((byte)0b1000_0000);
+        }
+
+        [TestMethod]
+        public void ReadByte_ZeroLength_AtEnd_ReadsNothing()
+        {
+            using MemoryStream ms = new MemoryStream(new byte[] { 10 });
+            BitStream stream = new BitStream(ms);
+            stream.ReadByte();
+
+            byte[] empty = stream.ReadByte(0);
+
+            empty.ShouldBeEmpty();
+            stream.EndOfStream.ShouldBeTrue();
+        }
+
+        [TestMethod]
         public void WriteByte_Span_RoundTrips()
         {
             BitStream stream = new BitStream();
